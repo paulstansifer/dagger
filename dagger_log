@@ -1,0 +1,57 @@
+2008-12-22 15:26 
+
+I came up with a pretty good way to take a doubly-linked list of
+pillars in a column, and cut a gap in them.  But doing the reverse
+seems like it might involve code duplication, and I can't think of a
+pretty way to manage the network of connections between pillars.
+Maybe a better representation is necessary.  Since we might have to
+use sprites anyways, maybe we might as well have individual objects
+for individual blocks?
+
+2008-12-24 00:33
+
+Dad and Eric convinced me to just simulate, block-by-block, the
+stresses experienced.  And I think I've got a good implementation of
+Ford-Fulkerson to do just that incrementally as blocks are added and
+removed.  Now I need to come up with a display scheme.  I should
+probably just use the current one (iterating over a fixed range),
+possibly modified by using Sprite s, until I've got the dungeon
+dynamics tested.  Figuring out a list of blocks that are in the
+current bounding box seems hard, though it occurs to me that, by
+making an artifical limit on z's range (since we fade out below that
+anyways), we can just iterate over the bounding box, and that'll be
+mostly right, anyways.
+
+I probably ought to write tests for F-F flow when I start working out
+bugs tomorrow.
+
+2008-12-24 11:37
+
+Refactoring out F-F flow right now.  I'm thinking about having sprites
+add themselves (and all coincident sprites above them) to a heap every
+time they get updated.  Need to make it so that removing a block
+real-izes the adjacent blocks, but real-izing a block only real-izes
+blocks above it (and not empty space!).  I believe this means that the
+only non-real blocks we'll ever display are the top blocks in their
+columns.
+
+2008-12-24 14:40
+
+Graphics on the rebuilt sprites-based are starting to work.  Still
+need to make the realizing stuff work.
+
+2008-12-24 16:15
+
+Yay!  Graphics work.  To do: realize blocks when necessary.  Display
+blocks when revealed.  Hook up fff.  Fix fff.
+
+2008-12-24 18:21
+
+Also to do: take care of stress being borne by a virtual block being
+realized.
+
+2008-12-24 19:16
+
+Yay!  Stress looks like it's being calculated right!  It's looks like
+it's being displayed wrong by a factor of two, but it's behaving about
+right.
