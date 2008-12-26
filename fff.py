@@ -2,24 +2,6 @@ from geom import *
 
 arb_capacity = 1000000
 
-class fff_dfs_report:
-  def __init__(self):
-    self.path = []; self.capacity = arb_capacity
-  def update(self, step, capacity):
-    self.path.append(step) #path is backwards for efficiency
-    self.capacity = min(self.capacity, capacity)
-
-  def apply_stress(self, start_loc, amount, backwards):
-    """for Ford-Fulkerson, apply stress to a path.  Warn the user
-    about any nodes that exceed that safety factor."""
-    self.path.reverse()
-    cur = start_loc
-    for d in self.path:
-      cur.       add_stress(d,               amount if not backwards else -amount)
-      cur.adj[d].add_stress(way.opposite(d), -amount if not backwards else amount)
-        
-      cur = cur.adj[d]
-
 cur_flow_id = 0
 
 class sink:
@@ -136,32 +118,6 @@ class node:
 
       result.apply_stress(iter_amount, backwards)
       remaining -= iter_amount
-
-  def fff_dfs(self, safety_factor, flow_id, backwards, breaking=False):
-    global cur_flow_id, broken_nodes
-    
-    self.flow_id_visited = flow_id
-    if breaking: broken_nodes.append(self)
-    for d in way.flow_ordered_bias:
-      other = self.adj[d]
-      if other == None or (isinstance(other, node) #sinks are always good
-                           and other.flow_id_visited == cur_flow_id):
-        continue
-      if backwards:
-        if isinstance(other, sink):
-          cap = arb_capacity
-        else:
-          cap = other.capacity_towards(way.opposite(d), safety_factor)
-      else:
-        cap = self.capacity_towards(d, safety_factor)
-      if cap <= 0:
-        continue
-      finish = other.fff_dfs(safety_factor, flow_id, backwards, breaking)
-      if finish != None:
-        finish.update(d, cap)
-        return finish
-    return None                                                
-
 
   def fff_bfs(self, safety_factor, flow_id, backwards, breaking=False):
     import Queue
