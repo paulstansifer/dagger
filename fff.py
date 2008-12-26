@@ -2,7 +2,7 @@ from geom import *
 
 arb_capacity = 1000000
 
-cur_flow_id = 0
+flow_id = 0
 
 class sink:
   def __init__(self):
@@ -15,9 +15,12 @@ class sink:
   
   def fff_dfs(self, safety_factor, flow_id, backwards, breaking): #breaking is forbidden
     return fff_dfs_report() #we've reached the end
+
+  def fff(self, amount):
+    pass
   
   def set_adj(self, d, val):
-   pass
+    pass
 
 broken_nodes = []
 
@@ -90,14 +93,11 @@ class node:
     negative, it removes stress, which is surprisingly like adding it.
     Invariant: the graph is always a correct flowing of all the
     non-virtual blocks into virtual ones."""
-    global cur_flow_id
-    
     backwards = amount < 0
     remaining = abs(amount)
 
     while remaining > 0:
-      cur_flow_id += 1
-      result = self.fff_bfs(2.0, cur_flow_id, backwards)
+      result = self.fff_bfs(2.0, backwards)
       if result == None:
         break #can't fit in the safety margin
       iter_amount = min(result.neck, remaining)
@@ -108,9 +108,9 @@ class node:
 
     #try again, exceeding the safety margin this time
     while remaining > 0:
-      cur_flow_id += 1
-      result = self.fff_bfs(1, cur_flow_id, backwards)
+      result = self.fff_bfs(1, backwards)
       if result == None: #dvpns315
+        self.fff_bfs(1, backwards, breaking=True)
         print "Boom!" #can't fit.  Time to destroy!
         break
       iter_amount = min(result.neck, remaining)
@@ -119,9 +119,12 @@ class node:
       result.apply_stress(iter_amount, backwards)
       remaining -= iter_amount
 
-  def fff_bfs(self, safety_factor, flow_id, backwards, breaking=False):
+  def fff_bfs(self, safety_factor, backwards, breaking=False):
+    global flow_id
     import Queue
     q = Queue.PriorityQueue(0)
+
+    flow_id += 1
 
     class bfs_path:
       def __init__(self, car, d, cdr, cap):
@@ -150,7 +153,7 @@ class node:
       for d in way.flow_ordered_bias:
         other = cur.adj[d]
         if other == None or (isinstance(other, node) #sinks are always good
-                             and other.flow_id_visited == cur_flow_id):
+                             and other.flow_id_visited == flow_id):
           continue
 
         if isinstance(other, sink):
@@ -166,5 +169,7 @@ class node:
           continue
         new_node = bfs_path(other, d, path, cap)
         q.put((new_node.dist/new_node.neck, new_node))
+        if breaking:
+          broken_nodes.append(cur)
     
     return None

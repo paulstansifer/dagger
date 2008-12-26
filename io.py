@@ -97,6 +97,7 @@ class dagger_io:
           else:
             print event.key, event
             print clock.get_fps()
+      world.process_structural_failure()
             
       gfx.paint_frame()
 

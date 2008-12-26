@@ -12,6 +12,18 @@ class AlreadyDone(Exception):
   pass
 
 
+def process_structural_failure():
+  import random
+  remaining = []
+  for n in fff.broken_nodes:
+    if random.randint(0,10) == 0:
+      world.dig(n.x, n.y, n.z)
+    else:
+      remaining.append(n)
+
+  broken_nodes = remaining
+
+    
 class geo:
   def __init__(self):
     self.cubes = {}
