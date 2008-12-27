@@ -45,12 +45,14 @@ class geo:
   def dig(self, x, y, z):
     c = self(x,y,z)
     if c != None:
-      c.remove()
-      self.cubes[(x,y,z)] = None
       for d in way.all:
         (dx, dy, dz) = (way.rel(d, (x,y,z)))
-        print dx,dy,dz
         self.realize(dx, dy, dz)
+
+      self.cubes[(x,y,z)] = None
+      c.remove()
+
+
 
   def construct(self, x, y, z):
     c = self(x,y,z)
@@ -68,7 +70,7 @@ class geo:
     c = self(x,y,z)
     if c == None: return
     if isinstance(c, virt_block):
-      self.cubes[(x,y,z)].delete()
+      self.cubes[(x,y,z)].remove()
       self.cubes[(x,y,z)] = block(x, y, z)
   
 world = geo()
@@ -77,10 +79,29 @@ world = geo()
 class virt_block(gfx.sprite_3d, fff.sink):
   def __init__(self, x, y, z):
     gfx.sprite_3d.__init__(self, gfx.virt_block, x, y, z)
-    fff.sink.__init__(self)
   
   def remove(self):
     self.delete()
+
+  #these silently swallow writes because they are kept consistent by
+  #the other side of the link, a non-virtual node (virtual<->virtual
+  #interactions are trivial
+
+  def _get_adj(self):
+    return [world.at(way.rel(d, (self.x, self.y, self.z)))
+                     for d in way.all]
+  adj = property(_get_adj)
+
+  def _get_stress_on(self):
+    def negative_stress_on_if_applicable(node, d):
+      if isinstance(node,block):
+        return -node.stress_on[d]
+      return 0 #if it's not a block, it can't transmit stress
+
+    return [negative_stress_on_if_applicable(self.adj[d],way.opposite(d))
+            for d in way.all]
+
+  stress_on = property(_get_stress_on)
 
 class block(gfx.sprite_3d, fff.node):
   #initializing a block; the links must be set correct
@@ -108,24 +129,8 @@ class block(gfx.sprite_3d, fff.node):
     else: #d == way.down
       return 50 / safety_factor - self.stress_on[d] #compression
 
-class rubble_pile(gfx.sprite_3d, fff.node):
-  def __init__(self, x, y, z, mass):
-    gfx.sprite_3d.__init__(self, gfx.block, x, y, z)
+  
 
-    self.mass = mass
-    #only connected down
-    fff.node.__init__(self,
-                      [world.at(way.rel(d, (x,y,z)))
-                       for d in way.all if d == way.down],
-                      self.mass)
-  def remove(self):
-    self.fff(-self.mass)
-    self.cut_links()
-    self.delete()
-
-  def capacity_towards(self, d, safety_factor=1):
-    if self.adj[d] == None: return 0
-    if d == way.down: return 10000
-    else: return 0
-
+class rubble_pile(block):
+  pass #TODO.  Only can be connected downwards
     

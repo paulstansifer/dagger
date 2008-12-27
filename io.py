@@ -94,6 +94,8 @@ class dagger_io:
             #w.invert(csr.x, csr.y, csr.z)
           elif event.key == K_SPACE:
             w.invert(csr.x, csr.y, csr.z)
+          elif event.key == K_r:
+            w.realize(csr.x, csr.y, csr.z)
           elif event.key == K_2:
             fill = (w(sex, sey, sez) == None)
             for ix in range(min(ssx, sex), max(ssx, sex)+1):

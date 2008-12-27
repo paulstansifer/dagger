@@ -60,3 +60,34 @@ right.
 
 Rewrote the depth-first search into a breadth-first search.  I think
 that there are still some cases in which flow isn't being resolved.
+
+2008-12-26 23:23
+
+Worked out a couple bugs, and underground digging is going pretty
+nicely.  One (known) difficulty with stress delivery remains, however.
+Suppose we have the following situation, where V is a virtual block,
+and R is a real one:
+    [V1][R1][V2][V3]
+    [R2]    [R3][R4]
+...and R1 is stressing on V2.  If R3 were removed, and V2 were to be
+realized, it would be far better for R1 to switch to stressing on V1,
+but instead we have a chain of stress streching to V3.  Perhaps we
+should reflow each edge individually when we realize a node?  Will
+that be good enough?  Maybe so...
+
+2008-12-26 23:35
+
+Something more sinister may be going on here.  By chasing the
+subterranean stress around, it's possible to create a chain that is
+bearing, say, 16/6 stress (even though it doesn't have to be), and yet
+still won't fall down.  
+
+2008-12-27 00:27
+
+Well.  Restructured code a lot, using properties and other fanciness.
+Oddly, it works quite similarly to the way it used to, excepting that
+it no longer gives stress warnings or displays stress.  Oh.  Right.
+That would be because I'm using stress_on[...] += instead of
+add_stress().  Much better.  The fundamental problem isn't solved.  In
+fact, I don't remember why it was supposed to be.  Oh, right, I still
+need to rewrite cut_links().  Well, that's for tomorrow.
