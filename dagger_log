@@ -55,3 +55,8 @@ realized.
 Yay!  Stress looks like it's being calculated right!  It's looks like
 it's being displayed wrong by a factor of two, but it's behaving about
 right.
+
+2008-12-25 21:06
+
+Rewrote the depth-first search into a breadth-first search.  I think
+that there are still some cases in which flow isn't being resolved.

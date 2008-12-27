@@ -14,6 +14,13 @@ block_s2 = load_img('block_s2')
 block_s3 = load_img('block_s3')
 virt_block = load_img('virt_block')
 mark1 = load_img('mark1')
+selbot = load_img('sel.bot')
+seltop = load_img('sel.top')
+selleft = load_img('sel.left')
+selright = load_img('sel.right')
+selfront = load_img('sel.front')
+selback = load_img('sel.back')
+
 
 pygame.display.set_caption('Dagger')
 pygame.mouse.set_visible(1)
@@ -53,6 +60,35 @@ def refresh_rect(r):
       
   dirty_rects.append(r)
 
+sel_sprites = []
+
+def paint_selection(s, e):
+  global sel_sprites
+  for sprite in sel_sprites:
+    sprite.delete()
+  sel_sprites = []
+
+  print s, e
+  
+  sx, sy, sz = s
+  ex, ey, ez = e
+  xr = xrange(min(sx, ex), max(sx, ex)+1)
+  yr = xrange(min(sy, ey), max(sy, ey)+1)
+  zr = xrange(min(sz, ez), max(sz, ez)+1)
+
+  for (xrn, yrn, zrn, pic, pri) in ( #generate an iteration for each side
+    [ (xr, yr, [zr[0]], selbot, -1),
+      (xr, yr, [zr[-1]], seltop, 1),
+      (xr, [yr[0]], zr, selfront, 1),
+      (xr, [yr[-1]], zr, selback, -1),
+      ([xr[0]], yr, zr, selleft, -1),
+      ([xr[-1]], yr, zr, selright, 1) ]):
+    for x in xrn:
+      for y in yrn:
+        for z in zrn:
+          sel_sprites.append(sprite_3d(pic, x, y, z, pri))
+          
+
 def paint_order(a, b):
   if a.z != b.z:
     return a.z - b.z
@@ -63,7 +99,7 @@ def paint_order(a, b):
   
   return a.pri - b.pri
 
-class block_3d(pygame.sprite.Sprite):
+class sprite_3d(pygame.sprite.Sprite):
   def __init__(self, image, x, y, z, pri=0):
     global background
     pygame.sprite.Sprite.__init__(self)
@@ -88,6 +124,6 @@ class block_3d(pygame.sprite.Sprite):
     """Repaint the rectange we occupy."""
     refresh_rect(self.rect)
 
-  def invisible(self):
+  def delete(self):
     visible.remove(self)
     self.repaint()

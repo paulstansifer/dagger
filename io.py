@@ -50,21 +50,30 @@ class depth_img:
 
 class dagger_io:
   def main(self):
+    w = world.world
     clock = pygame.time.Clock()
 
-    (ox, oy, oz) = (0, 0, 0)
+    (ssx, ssy, ssz) = (0,0,0)
+    (sex, sey, sez) = (0,0,0)
 
-    csr = gfx.block_3d(gfx.mark1, 0, 0, 0, pri=1)
+
+    csr = gfx.sprite_3d(gfx.mark1, 0, 0, 0, pri=1)
 
     for ix in range(-5,30):
       for iy in range(-5,30):
-        world.world(ix,iy,0)
+        w(ix,iy,0)
 
     while 1:
       clock.tick(35)
 
       for event in pygame.event.get():
         if event.type == QUIT: return
+        elif event.type == KEYUP:
+          if event.key == K_LSHIFT:
+            (sex, sey, sez) = (csr.x, csr.y, csr.z)
+            print sex, sey, sez
+            gfx.paint_selection((ssx,ssy,ssz), (sex, sey, sez))
+            print clock.get_fps()
         elif event.type == KEYDOWN:
           if event.key == K_ESCAPE:
             return
@@ -76,23 +85,24 @@ class dagger_io:
             csr.move(0,1,0)
           elif event.key == K_DOWN:
             csr.move(0,-1,0)
-          elif event.unicode == '.':
+          elif event.key == K_PERIOD:
             csr.move(0,0,-1)
-          elif event.unicode == ',':
+          elif event.key == K_COMMA:
             csr.move(0,0,1)
-          elif event.unicode == ' ':
-            world.world.invert(csr.x, csr.y, csr.z)
-          elif event.unicode == '1':
-            (ox, oy, oz) = (csr.x, csr.y, csr.z)
-          elif event.unicode == '2':
-            fill = (world.world(csr.x, csr.y, csr.z) == None)
-            for ix in range(min(ox, csr.x), max(ox, csr.x)+1):
-              for iy in range(min(oy, csr.y), max(oy, csr.y)+1):
-                for iz in range(min(oz, csr.z), max(oz, csr.z)+1):
+          elif event.key == K_LSHIFT:
+            (ssx, ssy, ssz) = (csr.x, csr.y, csr.z)
+            #w.invert(csr.x, csr.y, csr.z)
+          elif event.key == K_SPACE:
+            w.invert(csr.x, csr.y, csr.z)
+          elif event.key == K_2:
+            fill = (w(sex, sey, sez) == None)
+            for ix in range(min(ssx, sex), max(ssx, sex)+1):
+              for iy in range(min(ssy, sey), max(ssy, sey)+1):
+                for iz in range(min(ssz, sez), max(ssz, sez)+1):
                   if fill:
-                    world.world.construct(ix,iy,iz)
+                    w.construct(ix,iy,iz)
                   else:
-                    world.world.dig(ix,iy,iz)
+                    w.dig(ix,iy,iz)
                               
           else:
             print event.key, event
@@ -100,6 +110,10 @@ class dagger_io:
       world.process_structural_failure()
             
       gfx.paint_frame()
+      
+      framerate = clock.get_fps()
+      if framerate < 20:
+        print "low framerate: ", framerate
 
 #      screen.blit(background, (0,0))
 #      for z in range(7,-1+csr.z,-1):

@@ -21,7 +21,8 @@ def process_structural_failure():
     else:
       remaining.append(n)
 
-  broken_nodes = remaining
+  fff.broken_nodes = remaining
+
 
     
 class geo:
@@ -46,6 +47,10 @@ class geo:
     if c != None:
       c.remove()
       self.cubes[(x,y,z)] = None
+      for d in way.all:
+        (dx, dy, dz) = (way.rel(d, (x,y,z)))
+        print dx,dy,dz
+        self.realize(dx, dy, dz)
 
   def construct(self, x, y, z):
     c = self(x,y,z)
@@ -55,33 +60,32 @@ class geo:
   def invert(self, x, y, z):
     c = self(x,y,z)
     if c == None:
-      self.cubes[(x,y,z)] = block(x,y,z)
+      self.construct(x,y,z)
     else:
-      c.remove()
-      self.cubes[(x,y,z)] = None
-    
+      self.dig(x,y,z)
 
   def realize(self, x, y, z):
     c = self(x,y,z)
     if c == None: return
     if isinstance(c, virt_block):
+      self.cubes[(x,y,z)].delete()
       self.cubes[(x,y,z)] = block(x, y, z)
   
 world = geo()
 
 
-class virt_block(gfx.block_3d, fff.sink):
+class virt_block(gfx.sprite_3d, fff.sink):
   def __init__(self, x, y, z):
-    gfx.block_3d.__init__(self, gfx.virt_block, x, y, z)
+    gfx.sprite_3d.__init__(self, gfx.virt_block, x, y, z)
     fff.sink.__init__(self)
   
   def remove(self):
-    self.invisible()
+    self.delete()
 
-class block(gfx.block_3d, fff.node):
+class block(gfx.sprite_3d, fff.node):
   #initializing a block; the links must be set correct
   def __init__(self, x, y, z, realizing=False):
-    gfx.block_3d.__init__(self, gfx.block, x, y, z)
+    gfx.sprite_3d.__init__(self, gfx.block, x, y, z)
 
     self.mass = 1
     fff.node.__init__(self,
@@ -92,7 +96,7 @@ class block(gfx.block_3d, fff.node):
   def remove(self):
     self.fff(-self.mass) #remove our mass from the system
     self.cut_links()
-    self.invisible()
+    self.delete()
     
   def capacity_towards(self, d, safety_factor=1):
     if self.adj[d] == None:
@@ -104,9 +108,9 @@ class block(gfx.block_3d, fff.node):
     else: #d == way.down
       return 50 / safety_factor - self.stress_on[d] #compression
 
-class rubble_pile(gfx.block_3d, fff.node):
+class rubble_pile(gfx.sprite_3d, fff.node):
   def __init__(self, x, y, z, mass):
-    gfx.block_3d.__init__(self, gfx.block, x, y, z)
+    gfx.sprite_3d.__init__(self, gfx.block, x, y, z)
 
     self.mass = mass
     #only connected down
@@ -117,7 +121,7 @@ class rubble_pile(gfx.block_3d, fff.node):
   def remove(self):
     self.fff(-self.mass)
     self.cut_links()
-    self.invisible()
+    self.delete()
 
   def capacity_towards(self, d, safety_factor=1):
     if self.adj[d] == None: return 0
