@@ -91,3 +91,8 @@ That would be because I'm using stress_on[...] += instead of
 add_stress().  Much better.  The fundamental problem isn't solved.  In
 fact, I don't remember why it was supposed to be.  Oh, right, I still
 need to rewrite cut_links().  Well, that's for tomorrow.
+
+2008-12-27 15:06
+
+Yes!  I'm down to no known stress bugs.  Well, except for how a single
+block can float in the air without attachment.

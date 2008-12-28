@@ -58,13 +58,17 @@ class dagger_io:
 
 
     csr = gfx.sprite_3d(gfx.mark1, 0, 0, 0, pri=1)
+    gfx.change_cut(csr.z)
 
     for ix in range(-5,30):
       for iy in range(-5,30):
         w(ix,iy,0)
 
+    import psyco
+    psyco.full()
+
     while 1:
-      clock.tick(35)
+      clock.tick(25)
 
       for event in pygame.event.get():
         if event.type == QUIT: return
@@ -87,8 +91,10 @@ class dagger_io:
             csr.move(0,-1,0)
           elif event.key == K_PERIOD:
             csr.move(0,0,-1)
+            gfx.change_cut(csr.z)
           elif event.key == K_COMMA:
             csr.move(0,0,1)
+            gfx.change_cut(csr.z)
           elif event.key == K_LSHIFT:
             (ssx, ssy, ssz) = (csr.x, csr.y, csr.z)
             #w.invert(csr.x, csr.y, csr.z)

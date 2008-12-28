@@ -81,6 +81,7 @@ class virt_block(gfx.sprite_3d, fff.sink):
     gfx.sprite_3d.__init__(self, gfx.virt_block, x, y, z)
   
   def remove(self):
+    self.cut_links()
     self.delete()
 
   #these silently swallow writes because they are kept consistent by

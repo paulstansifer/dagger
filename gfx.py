@@ -3,6 +3,7 @@ from pygame.locals import *
 
 def load_img(name):
   return pygame.image.load('gfx/'+name+'.png').convert_alpha()
+#adding .set_alpha(255, pygame.RLE_ACCEL) might speed things up.  Profile!
 
 pygame.init()
 
@@ -33,14 +34,25 @@ screen.blit(background, (0,0))
 dirty_rects = []
 visible = pygame.sprite.Group()
 
+over_the_cut = pygame.Surface(screen.get_size()).convert()
+over_the_cut.set_alpha(32, 0) #we modify more than we blit
+
+cut = 0
+
 def paint_frame():
   global dirty_rects
   pygame.display.update(dirty_rects)
   #pygame.display.flip()
   dirty_rects = []
 
+def change_cut(new_cut):
+  global cut
+  cut = new_cut
+  refresh_rect(screen.get_rect())
+  dirty_rects = [screen.get_rect()] #repaint all
+
 def refresh_rect(r):
-  global dirty_rects, background
+  global dirty_rects, background, cut
 
   dirty_sprites = []
   all_sprites = visible.sprites()
@@ -50,11 +62,18 @@ def refresh_rect(r):
   dirty_sprites.sort(cmp=paint_order)
 
   screen.set_clip(r)
+  screen.fill((128,128,128))
 
-  screen.blit(background, r, r)
+  over_the_cut.set_clip(r)
+  over_the_cut.fill((0,0,0,0))#transparent
 
   for paintme in dirty_sprites:
-    screen.blit(paintme.image, paintme.rect)
+    if paintme.z <= cut:
+      screen.blit(paintme.image, paintme.rect)
+    else:
+      over_the_cut.blit(paintme.image, paintme.rect)
+
+  screen.blit(over_the_cut, r, r)
     
   screen.set_clip(None)
       
