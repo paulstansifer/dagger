@@ -1,3 +1,7 @@
 This requires Python 2.6 and pygame.
 
 'python io.py' to run.
+
+Controls: arrow keys and comma and period to navigate.  Space toggles
+the current block.  Hold shift while moving to select a 3D region; hit
+'2' to toggle it.

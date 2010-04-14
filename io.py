@@ -63,9 +63,12 @@ class dagger_io:
     for ix in range(-5,30):
       for iy in range(-5,30):
         w(ix,iy,0)
-
-    import psyco
-    psyco.full()
+    
+    try:
+      import psyco
+      psyco.full()
+    except:
+      print "Installing Psyco might make this run faster."
 
     while 1:
       clock.tick(25)
